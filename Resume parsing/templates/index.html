@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Parser</title>
+</head>
+<body>
+    <h1>Resume Parser</h1>
+    <form action="/" method="POST" enctype="multipart/form-data">
+        <label for="resume_folder">Resume Folder Path:</label>
+        <input type="text" id="resume_folder" name="resume_folder" required><br><br>
+        
+        <label for="job_description_file">Job Description File:</label>
+        <input type="file" id="job_description_file" name="job_description_file" accept=".pdf,.docx,.txt" required><br><br>
+
+        <input type="submit" value="Parse Resumes">
+    </form>
+
+    {% if resumes %}
+        <h2>Results:</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Education</th>
+                    <th>Skills</th>
+                    <th>Experience</th>
+                    <th>Similarity Score (%)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for resume in resumes %}
+                    <tr>
+                        <td>{{ resume.Name }}</td>
+                        <td>{{ resume.Education }}</td>
+                        <td>{{ resume.Skills }}</td>
+                        <td>{{ resume.Experience }}</td>
+                        <td>{{ resume.SimilarityScore | default('N/A') }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</body>
+</html>

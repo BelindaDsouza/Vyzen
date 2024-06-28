@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        header h1 {
+            margin: 0;
+        }
+        #chatbox {
+            width: 300px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            flex-direction: column;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #chatbox header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        #chatbox #chatlog {
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #d1e7dd;
+            text-align: right;
+        }
+        .bot-response {
+            background-color: #f8d7da;
+            text-align: left;
+        }
+        #userInput {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 10px;
+        }
+        #sendButton {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #chatIcon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='vyzen_logo.jfif') }}" alt="VYZEN Logo"> <!-- Replace with the path to your logo image -->
+        <h1>VYZEN</h1>
+    </header>
+
+    <div id="chatbox">
+        <header>Chat with us</header>
+        <div id="chatlog"></div>
+        <input type="text" id="userInput" placeholder="Type a message...">
+        <button id="sendButton">Send</button>
+    </div>
+
+    <img id="chatIcon" src="{{ url_for('static', filename='chatbot.png') }}" alt="Chat Icon"> <!-- Replace with the path to your chat icon image -->
+
+    <script>
+        let defaultMessageShown = false;
+        let awaitingApplicationStatus = false;
+
+        function showDefaultMessage() {
+            if (!defaultMessageShown) {
+                const defaultMessage = document.createElement("div");
+                defaultMessage.className = "message bot-response";
+                defaultMessage.innerHTML = `Hello! Welcome to VYZEN Careers. How can I assist you today?`;
+                document.getElementById("chatlog").appendChild(defaultMessage);
+                document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+                defaultMessageShown = true;
+            }
+        }
+    
+        document.getElementById("chatIcon").addEventListener("click", function() {
+            const chatbox = document.getElementById("chatbox");
+            chatbox.style.display = chatbox.style.display === "none" ? "flex" : "none";
+            if (chatbox.style.display !== "none") {
+                showDefaultMessage();
+            }
+        });
+    
+        document.getElementById("sendButton").addEventListener("click", function() {
+            const userInput = document.getElementById("userInput").value;
+            if (userInput.trim() !== "") {
+                const userMessage = document.createElement("div");
+                userMessage.className = "message user-message";
+                userMessage.textContent = userInput;
+                document.getElementById("chatlog").appendChild(userMessage);
+    
+                if (awaitingApplicationStatus) {
+                    handleApplicationStatus(userInput);
+                } else {
+                    sendMessageToServer(userInput);
+                }
+    
+                document.getElementById("userInput").value = "";
+            }
+        });
+    
+        function sendMessageToServer(message) {
+            fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botResponse = document.createElement("div");
+                botResponse.className = "message bot-response";
+                botResponse.textContent = data.response;
+                document.getElementById("chatlog").appendChild(botResponse);
+
+                if (data.response.includes("provide your application ID")) {
+                    awaitingApplicationStatus = true;
+                }
+            });
+        }
+    
+        function handleApplicationStatus(applicationId) {
+            fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: applicationId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botResponse = document.createElement("div");
+                botResponse.className = "message bot-response";
+                botResponse.textContent = data.response;
+                document.getElementById("chatlog").appendChild(botResponse);
+                awaitingApplicationStatus = false; // Reset status check flag
+            });
+        }
+    
+        // Show default message when page loads
+        document.addEventListener("DOMContentLoaded", function() {
+            showDefaultMessage();
+        });
+    </script>
+</body>
+</html>

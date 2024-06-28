@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Recommendation</title>
+</head>
+<body>
+    <h1>Job Recommendation System</h1>
+    <form method="post">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required value="{{ session['name'] if session.get('name') else '' }}"><br>
+        
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" required value="{{ session['dob'] if session.get('dob') else '' }}"><br>
+        
+        <h3>Education</h3>
+
+        <label for="school">School:</label>
+        <input type="text" id="school" name="school" required value="{{ session['school'] if session.get('school') else '' }}"><br>
+        
+        <label for="degree">Degree:</label>
+        <input type="text" id="degree" name="degree" required value="{{ session['degree'] if session.get('degree') else '' }}"><br>
+        
+        <label for="field_of_study">Field of Study:</label>
+        <input type="text" id="field_of_study" name="field_of_study" required value="{{ session['field_of_study'] if session.get('field_of_study') else '' }}"><br>
+        
+        <label for="year_of_passing">Year of Passing:</label>
+        <input type="number" id="year_of_passing" name="year_of_passing" required value="{{ session['year_of_passing'] if session.get('year_of_passing') else '' }}"><br>
+        
+        <label for="grade">Grade:</label>
+        <input type="text" id="grade" name="grade" required value="{{ session['grade'] if session.get('grade') else '' }}"><br>
+        
+        <h3>Skills</h3>
+        <label for="skills">Skills:</label><br>
+        <div id="skills-checkboxes">
+            <!-- Skills checkboxes will be dynamically generated here -->
+        </div><br>
+
+        <script>
+            // List of skills
+            const skills = ["Python", "SQL", "Machine Learning", "Data Analysis", "HTML", "CSS",
+                "Financial Risk","Accounts","Business","SAP","Cash flow","Tally","Audit",
+                "Excel","Analytics","Scrum","Business analysis","Estimation","Cost Analysis","Site Engineerging",
+                "Bridge design","Java","Unix","Linux","Mysql","Oracle","Database","Data Modeling",
+                "Staffing","Payroll","Recruitment","Screening","Human Resource","Patient care",
+                "Staff nurse","Healthcare","Nursing"
+            ];
+            const selectedSkills = {{ session['skills']|tojson|safe }};
+            
+            // Generate checkboxes dynamically
+            const skillsContainer = document.getElementById("skills-checkboxes");
+            skills.forEach(skill => {
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = skill.toLowerCase().replace(" ", "-");
+                checkbox.name = "skills";
+                checkbox.value = skill;
+                if (selectedSkills && selectedSkills.includes(skill)) {
+                    checkbox.checked = true;
+                }
+                
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id;
+                label.textContent = ` ${skill}`;
+                
+                skillsContainer.appendChild(checkbox);
+                skillsContainer.appendChild(label);
+                skillsContainer.appendChild(document.createElement("br"));
+            });
+        </script>
+
+        <h3>Preferred Location</h3>
+        <label for="preferred_location">Preferred Location:</label><br>
+        <div id="location-checkboxes">
+            <!-- Location checkboxes will be dynamically generated here -->
+        </div><br>
+
+        <script>
+            // List of locations
+            const locations = ["Ahmedabad","Bengaluru","Delhi","Hyderabad","Mumbai", "Pune", "Gurgaon", "Chennai","Kolkata","Mangalore","Mohali","Noida"];
+            const selectedLocations = {{ session['preferred_location']|tojson|safe }};
+            
+            // Generate checkboxes dynamically for locations
+            const locationContainer = document.getElementById("location-checkboxes");
+            locations.forEach(location => {
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = location.toLowerCase().replace(" ", "-");
+                checkbox.name = "preferred_location";
+                checkbox.value = location;
+                if (selectedLocations && selectedLocations.includes(location)) {
+                    checkbox.checked = true;
+                }
+                
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id;
+                label.textContent = ` ${location}`;
+                
+                locationContainer.appendChild(checkbox);
+                locationContainer.appendChild(label);
+                locationContainer.appendChild(document.createElement("br"));
+            });
+        </script>
+
+        <h3>Preferred Job Role</h3>
+        <div id="job-role-checkboxes">
+            <!-- Preferred job roles checkboxes will be dynamically generated here -->
+        </div><br>
+
+        <script>
+            // List of preferred job roles
+            const preferredJobRoles = ["Accounts Manager","Analyst","Business Analyst","Cabin Crew",
+            "Cashier","Civil Engineer","Data Analyst","DBA","EDP Analyst","ERP Consultant","HR Executive","Nurse"];
+            const selectedJobRoles = {{ session['preferred_job_role']|tojson|safe }};
+            
+            // Generate checkboxes dynamically for preferred job roles
+            const jobRoleContainer = document.getElementById("job-role-checkboxes");
+            preferredJobRoles.forEach(role => {
+                const checkbox = document.createElement("input");
+                checkbox.type = "checkbox";
+                checkbox.id = role.toLowerCase().replace(" ", "-");
+                checkbox.name = "preferred_job_role";
+                checkbox.value = role;
+                if (selectedJobRoles && selectedJobRoles.includes(role)) {
+                    checkbox.checked = true;
+                }
+                
+                const label = document.createElement("label");
+                label.htmlFor = checkbox.id;
+                label.textContent = ` ${role}`;
+                
+                jobRoleContainer.appendChild(checkbox);
+                jobRoleContainer.appendChild(label);
+                jobRoleContainer.appendChild(document.createElement("br"));
+            });
+        </script>
+
+        <button type="submit">Update</button>
+    </form>
+
+    {% if recommendations %}
+        <h2>Recommended Jobs:</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Job Title</th>
+                    <th>Job Experience Required</th>
+                    <th>Key Skills</th>
+                    <th>Location</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in recommendations %}
+                    <tr>
+                        <td>{{ job['Job Title'] }}</td>
+                        <td>{{ job['Job Experience Required'] }}</td>
+                        <td>{{ job['Key Skills'] }}</td>
+                        <td>{{ job['Location'] }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No recommendations found.</p>
+    {% endif %}
+</body>
+</html>

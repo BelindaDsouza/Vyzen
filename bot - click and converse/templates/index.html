@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Application Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+        header img {
+            height: 40px;
+            margin-right: 20px;
+        }
+        header h1 {
+            margin: 0;
+        }
+        #chatbox {
+            width: 300px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none;
+            flex-direction: column;
+            background: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #chatbox header {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+        #chatbox #chatlog {
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .message {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .user-message {
+            background-color: #d1e7dd;
+            text-align: right;
+        }
+        .bot-response {
+            background-color: #f8d7da;
+            text-align: left;
+        }
+        #userInput {
+            width: calc(100% - 22px);
+            padding: 10px;
+            margin-top: 10px;
+        }
+        #sendButton {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: url('{{ url_for('static', filename='arrow.png') }}') no-repeat center;
+            background-size: cover;
+            border: none;
+        }
+        #chatIcon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+        }
+        .option-buttons {
+            display: flex;
+            flex-direction: column;
+        }
+        .option-button {
+            background-color: #e0f7fa;
+            border: 1px solid #00acc1;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='vyzen_logo.jfif') }}" alt="VYZEN Logo">
+        <h1>VYZEN</h1>
+    </header>
+
+    <div id="chatbox">
+        <header>Chat with us</header>
+        <div id="chatlog"></div>
+        <input type="text" id="userInput" placeholder="Type a message...">
+        <button id="sendButton"></button>
+    </div>
+
+    <img id="chatIcon" src="{{ url_for('static', filename='chatbot.png') }}" alt="Chat Icon">
+
+    <script>
+        document.getElementById("chatIcon").addEventListener("click", function() {
+            const chatbox = document.getElementById("chatbox");
+            chatbox.style.display = chatbox.style.display === "none" ? "flex" : "none";
+            if (chatbox.style.display === "flex") {
+                showDefaultMessage();
+            }
+        });
+
+        document.getElementById("sendButton").addEventListener("click", sendMessage);
+
+        document.getElementById("userInput").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+
+        function showDefaultMessage() {
+            const defaultMessage = document.createElement("div");
+            defaultMessage.className = "message bot-response";
+            defaultMessage.innerHTML = `Hello! Welcome to VYZEN Careers. How can I assist you today?`;
+            document.getElementById("chatlog").appendChild(defaultMessage);
+            document.getElementById("chatlog").appendChild(createOptions());
+            document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+        }
+
+        function createOptions() {
+            const optionsContainer = document.createElement("div");
+            optionsContainer.className = "option-buttons";
+
+            const options = ["Tell me about current job vacancies", "How do I apply for a job?", "What is the status of my application?"];
+            options.forEach(option => {
+                const optionButton = document.createElement("div");
+                optionButton.className = "option-button";
+                optionButton.textContent = option;
+                optionButton.addEventListener("click", function() {
+                    handleOptionClick(option);
+                });
+                optionsContainer.appendChild(optionButton);
+            });
+
+            return optionsContainer;
+        }
+
+        function handleOptionClick(option) {
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user-message";
+            userMessage.textContent = option;
+            document.getElementById("chatlog").appendChild(userMessage);
+            document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+
+            fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: option })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botResponse = document.createElement("div");
+                botResponse.className = "message bot-response";
+                botResponse.textContent = data.response;
+                document.getElementById("chatlog").appendChild(botResponse);
+                document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+
+                if (option === "What is the status of my application?") {
+                    promptForApplicationId();
+                }
+            });
+        }
+
+        function promptForApplicationId() {
+            const botPrompt = document.createElement("div");
+            botPrompt.className = "message bot-response";
+            botPrompt.textContent = data.response;
+            document.getElementById("chatlog").appendChild(botPrompt);
+            document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+        }
+
+        function sendMessage() {
+            const userInput = document.getElementById("userInput").value;
+            if (userInput.trim() === "") return;
+
+            const userMessage = document.createElement("div");
+            userMessage.className = "message user-message";
+            userMessage.textContent = userInput;
+            document.getElementById("chatlog").appendChild(userMessage);
+            document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+
+            fetch("/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const botResponse = document.createElement("div");
+                botResponse.className = "message bot-response";
+                botResponse.textContent = data.response;
+                document.getElementById("chatlog").appendChild(botResponse);
+                document.getElementById("chatlog").scrollTop = document.getElementById("chatlog").scrollHeight;
+            });
+
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+</body>
+</html>
