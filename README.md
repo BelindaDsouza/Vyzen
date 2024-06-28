@@ -1,3 +1,7 @@
+Vyzen Level-2 Technical Assesment
+
+This is the highlights. The brief explanation can be found in brief explanation of approach.docx file.
+
 Task 1. Resume Parsing and Analysis:
    - Create a model to extract key information (name, education, work experience, skills) from a set of sample resumes.
    - Develop an algorithm to match candidate resumes with job descriptions based on the extracted information.
